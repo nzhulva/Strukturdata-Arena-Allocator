@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "arena.h"
 #include "order_array.h"
+#include "linked_list.h"
 
 int main() {
 
@@ -46,9 +47,16 @@ int main() {
     printf("\nStatus arena:\n");
     arena_status(&arena);
 
-    // 8. Dump visual (grid memori)
-    printf("\nVisualisasi arena:\n");
-    arena_dump(&arena);
+    printf("\n--- LINKED LIST ---\n");
+
+    LinkedList list;
+    ll_init(&list, &arena);
+
+    ll_insert(&list, 2001, "Hoodie", 2);
+    ll_insert(&list, 2002, "Kaos", 1);
+    ll_insert(&list, 2003, "Topi", 4);
+
+    ll_print(&list);
 
     // 9. Reset arena
     printf("\nReset arena...\n");
