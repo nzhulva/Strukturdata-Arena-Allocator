@@ -121,3 +121,5 @@ int main() {
     printf("[BATCH] Semua pesanan selesai diproses.\n");
     printf("\n[ARENA] Status setelah semua pesanan diproses:\n");
     arena_status(&arena);
+    return 0;
+}   
