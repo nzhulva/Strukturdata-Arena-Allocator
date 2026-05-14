@@ -2,20 +2,23 @@
 #define ARENA_H
 
 #include <stdio.h>
-#include <stdint.h>
+#include <limits.h>
 #include <stdlib.h>
 
+// Arena = satu blok memori statis yang dikelola sendiri
+// Tidak ada malloc/calloc/free di level struktur data
+// Konteks: ruang kerja satu sesi live TikTok Shop
 typedef struct {
-    uint8_t *memory;
-    size_t total;
-    size_t used;
+    uint8_t *memory; // blok memori statis
+    size_t   total;  // ukuran total (byte)
+    size_t   used;   // sudah terpakai berapa byte
 } Arena;
 
-void arena_init(Arena *ar, uint8_t *mem, size_t size);
-size_t arena_alloc(Arena *ar, size_t req);
-void* arena_get(Arena *ar, size_t offset);
-void arena_reset(Arena *ar);
-void arena_status(Arena *ar);
-void arena_dump(Arena *ar, const char *label);
+void   arena_init   (Arena *ar, uint8_t *mem, size_t size);
+size_t arena_alloc  (Arena *ar, size_t req);
+void  *arena_get    (Arena *ar, size_t offset);
+void   arena_reset  (Arena *ar);
+void   arena_status (Arena *ar);
+void   arena_dump   (Arena *ar, const char *label);
 
 #endif

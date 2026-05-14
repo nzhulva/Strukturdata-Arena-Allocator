@@ -3,31 +3,25 @@
 
 #include "arena.h"
 
-// Struct data pesanan (satu record)
+// Satu record pesanan sembako
 typedef struct {
-    int id;             // ID pesanan
-    char nama[50];      // nama item / pelanggan
-    int jumlah;         // jumlah item
+    int  id;
+    char nama[50];  // nama produk sembako
+    int  jumlah;
 } Order;
 
-// Struct array yang hidup di dalam arena
+// Control struct array (hidup di luar arena)
+// Menyimpan metadata: di mana data dimulai, kapasitas, jumlah terisi
 typedef struct {
-    Arena *ar;          // arena tempat data disimpan
-    size_t base;        // offset awal array di arena
-    size_t kapasitas;   // kapasitas maksimum
-    size_t jumlah;      // jumlah data saat ini
+    Arena  *ar;
+    size_t  base;       // offset awal array di arena
+    size_t  kapasitas;  // kapasitas maksimum
+    size_t  jumlah;     // jumlah data yang sudah masuk
 } OrderArray;
 
-// Membuat array di arena
-int create_array(OrderArray *a, Arena *ar, size_t kapasitas);
-
-// Menambahkan data pesanan
-size_t insert_order(OrderArray *a, int id, const char *nama, int jumlah);
-
-// Mengambil data berdasarkan index
-Order* get_order(OrderArray *a, size_t i);
-
-// Menampilkan seluruh data
-void print_orders(OrderArray *a);
+int     create_array  (OrderArray *a, Arena *ar, size_t kapasitas);
+size_t  insert_order  (OrderArray *a, int id, const char *nama, int jumlah);
+Order  *get_order     (OrderArray *a, size_t i);
+void    print_orders  (OrderArray *a);
 
 #endif

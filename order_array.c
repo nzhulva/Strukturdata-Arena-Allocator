@@ -2,118 +2,67 @@
 #include <string.h>
 #include "order_array.h"
 
-// Membuat array baru di arena
+// Buat array di arena — alokasi kapasitas*sizeof(Order) sekaligus
+// Semua elemen nanti berjejer rapat (kontigu) = bagus untuk cache
 int create_array(OrderArray *a, Arena *ar, size_t kapasitas) {
+    if (a == NULL || ar == NULL || kapasitas == 0) return 0;
 
-    // cek parameter biar aman
-    if (a == NULL || ar == NULL || kapasitas == 0) {
-        printf("ERROR: parameter tidak valid\n");
-        return 0;
-    }
-
-    // alokasi memori di arena
     size_t pos = arena_alloc(ar, kapasitas * sizeof(Order));
+    if (pos == (size_t)-1) return 0;
 
-    // cek kalau gagal
-    if (pos == (size_t)-1) {
-        printf("GAGAL: arena tidak cukup\n");
-        return 0;
-    }
-
-    // isi struct array
-    a->ar = ar;
-    a->base = pos;
+    a->ar        = ar;
+    a->base      = pos;
     a->kapasitas = kapasitas;
-    a->jumlah = 0;
+    a->jumlah    = 0;
 
-    printf("Array dibuat di offset %zu\n", pos);
+    printf("[ARRAY] Dibuat di offset %zu (maks %zu pesanan)\n", pos, kapasitas);
     return 1;
 }
 
-// Menambahkan pesanan ke array
+// Tambah pesanan ke slot berikutnya
+// Offset dihitung: base + jumlah * sizeof(Order)
 size_t insert_order(OrderArray *a, int id, const char *nama, int jumlah) {
-
-    // validasi awal
-    if (a == NULL || a->ar == NULL) {
-        printf("ERROR: array belum siap\n");
-        return (size_t)-1;
-    }
-
-    // cek penuh
+    if (a == NULL || a->ar == NULL) return (size_t)-1;
     if (a->jumlah >= a->kapasitas) {
-        printf("GAGAL: array penuh\n");
+        printf("[ARRAY] Penuh.\n");
         return (size_t)-1;
     }
 
-    // hitung offset posisi data
     size_t offset = a->base + a->jumlah * sizeof(Order);
+    Order *o = (Order *) arena_get(a->ar, offset);
+    if (o == NULL) return (size_t)-1;
 
-    // ambil alamat dari arena
-    Order *o = (Order*) arena_get(a->ar, offset);
-
-    // cek kalau gagal akses
-    if (o == NULL) {
-        printf("ERROR: akses gagal\n");
-        return (size_t)-1;
-    }
-
-    // isi data
-    o->id = id;
-
-    // amanin string
-    if (nama != NULL) {
-        strncpy(o->nama, nama, 49);
-        o->nama[49] = '\0';
-    } else {
-        o->nama[0] = '\0';
-    }
-
+    o->id     = id;
     o->jumlah = jumlah;
-
-    // update jumlah data
+    strncpy(o->nama, nama ? nama : "", 49);
+    o->nama[49] = '\0';
     a->jumlah++;
 
-    printf("Pesanan masuk di offset %zu\n", offset);
     return offset;
 }
 
-// Mengambil data berdasarkan index
-Order* get_order(OrderArray *a, size_t i) {
-
-    // validasi
-    if (a == NULL || a->ar == NULL || i >= a->jumlah) {
-        return NULL;
-    }
-
-    // hitung offset
+// Akses elemen ke-i lewat kalkulasi offset langsung
+Order *get_order(OrderArray *a, size_t i) {
+    if (a == NULL || i >= a->jumlah) return NULL;
     size_t offset = a->base + i * sizeof(Order);
-
-    // ambil dari arena
-    return (Order*) arena_get(a->ar, offset);
+    return (Order *) arena_get(a->ar, offset);
 }
 
-// Menampilkan seluruh isi array
+// Tampilkan seluruh isi array beserta offset tiap elemen
 void print_orders(OrderArray *a) {
-
     if (a == NULL) return;
 
-    printf("\n=== DATA PESANAN ===\n");
-    printf("Kapasitas: %zu | Terisi: %zu\n", a->kapasitas, a->jumlah);
-    printf("Base offset: %zu\n", a->base);
+    printf("\n=== DATABASE PESANAN (ARRAY) ===\n");
+    printf("Kapasitas: %zu | Terisi: %zu | Base: %zu\n",
+           a->kapasitas, a->jumlah, a->base);
+    printf("--------------------------------\n");
 
     for (size_t i = 0; i < a->jumlah; i++) {
-
-        // ambil offset
-        size_t offset = a->base + i * sizeof(Order);
-
-        // ambil data
-        Order *o = get_order(a, i);
-
-        if (o != NULL) {
-            printf("[%zu] off=%zu | id=%d | %s | jumlah=%d\n",
-                   i, offset, o->id, o->nama, o->jumlah);
-        }
+        size_t  off = a->base + i * sizeof(Order);
+        Order  *o   = get_order(a, i);
+        if (o)
+            printf("[%zu] off=%-4zu | ID=%-3d | %-20s | jumlah=%d\n",
+                   i, off, o->id, o->nama, o->jumlah);
     }
-
-    printf("====================\n\n");
+    printf("================================\n\n");
 }
