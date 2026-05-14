@@ -16,5 +16,6 @@ size_t arena_alloc(Arena *ar, size_t req);
 void* arena_get(Arena *ar, size_t offset);
 void arena_reset(Arena *ar);
 void arena_status(Arena *ar);
+void arena_dump(Arena *ar, const char *label);
 
 #endif
